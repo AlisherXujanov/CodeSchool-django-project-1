@@ -1,0 +1,337 @@
+{% extends 'base.html' %}
+
+{% block title %}Posts - Online Shop{% endblock %}
+
+{% block content %}
+<style>
+    /* ===== POSTS PAGE STYLES ===== */
+    .posts-header {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        margin-bottom: 4rem;
+        padding: 2rem 0;
+    }
+
+    .posts-header h1 {
+        font-size: 2.8rem;
+        margin-bottom: 0.8rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--tertiary-color));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+    }
+
+    .posts-header p {
+        font-size: 1.1rem;
+        color: var(--text-light);
+        max-width: 500px;
+    }
+
+    .posts-actions {
+        display: flex;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 2rem;
+        flex-wrap: wrap;
+    }
+
+    .btn-create-post {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.6rem;
+        background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+        color: white;
+        padding: 0.9rem 2rem;
+        border-radius: 50px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        box-shadow: var(--shadow-md);
+        transition: var(--transition);
+        text-decoration: none;
+        border: none;
+        cursor: pointer;
+        font-size: 0.9rem;
+    }
+
+    .btn-create-post:hover {
+        transform: translateY(-3px);
+        box-shadow: var(--shadow-lg);
+        color: white;
+    }
+
+    .btn-create-post i {
+        font-size: 1.1rem;
+    }
+
+    /* ===== POSTS GRID ===== */
+    .posts-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 2rem;
+        margin-bottom: 3rem;
+    }
+
+    .post-card {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: var(--shadow-sm);
+        transition: var(--transition);
+        display: flex;
+        flex-direction: column;
+        border: 1px solid var(--border-color);
+        height: 100%;
+    }
+
+    .post-card:hover {
+        transform: translateY(-8px);
+        box-shadow: var(--shadow-lg);
+        border-color: var(--primary-color);
+    }
+
+    .post-header {
+        padding: 1.8rem 1.8rem 1rem;
+        border-bottom: 2px solid var(--light-bg);
+        position: relative;
+    }
+
+    .post-header::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, var(--primary-color), var(--tertiary-color));
+    }
+
+    .post-title {
+        font-size: 1.3rem;
+        font-weight: 700;
+        color: var(--text-dark);
+        margin-bottom: 0.5rem;
+        word-wrap: break-word;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+    }
+
+    .post-meta {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        color: var(--text-light);
+    }
+
+    .post-meta i {
+        color: var(--primary-color);
+    }
+
+    .post-content {
+        padding: 1.5rem 1.8rem;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    .post-body {
+        color: var(--text-light);
+        font-size: 0.95rem;
+        line-height: 1.7;
+        margin-bottom: 1.5rem;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        overflow: hidden;
+        flex: 1;
+    }
+
+    .post-footer {
+        display: flex;
+        gap: 0.8rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--light-bg);
+        margin-top: auto;
+    }
+
+    .post-action-btn {
+        flex: 1;
+        padding: 0.7rem 1rem;
+        border-radius: 8px;
+        border: none;
+        font-weight: 600;
+        cursor: pointer;
+        transition: var(--transition);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.3px;
+    }
+
+    .post-action-btn.edit {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+    }
+
+    .post-action-btn.edit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    }
+
+    .post-action-btn.delete {
+        background: #fee;
+        color: #c33;
+        border: 1px solid #fcc;
+    }
+
+    .post-action-btn.delete:hover {
+        background: #fdd;
+        border-color: #c33;
+        transform: translateY(-2px);
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--shadow-sm);
+        border: 1px dashed var(--border-color);
+    }
+
+    .empty-state i {
+        font-size: 3.5rem;
+        color: var(--primary-color);
+        margin-bottom: 1.5rem;
+        opacity: 0.7;
+    }
+
+    .empty-state h2 {
+        color: var(--text-dark);
+        margin-bottom: 0.8rem;
+    }
+
+    .empty-state p {
+        color: var(--text-light);
+        margin-bottom: 2rem;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 768px) {
+        .posts-header h1 {
+            font-size: 2rem;
+        }
+
+        .posts-grid {
+            grid-template-columns: 1fr;
+            gap: 1.5rem;
+        }
+
+        .posts-actions {
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .btn-create-post {
+            width: 100%;
+            justify-content: center;
+        }
+
+        .post-footer {
+            flex-direction: column;
+        }
+
+        .post-action-btn {
+            width: 100%;
+        }
+    }
+
+    @media (max-width: 480px) {
+        .posts-header {
+            margin-bottom: 2rem;
+            padding: 1rem 0;
+        }
+
+        .posts-header h1 {
+            font-size: 1.8rem;
+        }
+
+        .posts-header p {
+            font-size: 0.95rem;
+        }
+
+        .post-header {
+            padding: 1.2rem 1.2rem 0.8rem;
+        }
+
+        .post-content {
+            padding: 1rem 1.2rem;
+        }
+    }
+</style>
+
+<main class="container">
+    <div class="posts-header">
+        <h1><i class="fas fa-pen-fancy" style="margin-right: 0.8rem; font-size: 2.5rem;"></i>Our Posts</h1>
+        <p>Explore our latest articles and insights</p>
+
+        <div class="posts-actions">
+            <a href="{% url 'create_post' %}" class="btn-create-post">
+                <i class="fas fa-plus-circle"></i>
+                Create New Post
+            </a>
+        </div>
+    </div>
+
+    <!-- Posts Grid -->
+    {% if posts %}
+        <div class="posts-grid">
+            {% for post in posts %}
+                <div class="post-card">
+                    <div class="post-header">
+                        <h3 class="post-title">{{ post.title }}</h3>
+                        <div class="post-meta">
+                            <i class="fas fa-calendar-alt"></i>
+                            <span>{{ post.created_at|date:"M d, Y" }}</span>
+                        </div>
+                    </div>
+
+                    <div class="post-content">
+                        <div class="post-body">
+                            {{ post.content }}
+                        </div>
+
+                        <div class="post-footer">
+                            <button class="post-action-btn edit" onclick="location.href='#'">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                            <button class="post-action-btn delete" onclick="if(confirm('Delete this post?')) location.href='#'">
+                                <i class="fas fa-trash-alt"></i> Delete
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="empty-state">
+            <i class="fas fa-inbox"></i>
+            <h2>No Posts Yet</h2>
+            <p>Start creating your first post to share your thoughts with the world!</p>
+            <a href="{% url 'create_post' %}" class="btn-create-post">
+                <i class="fas fa-plus-circle"></i>
+                Create First Post
+            </a>
+        </div>
+    {% endif %}
+</main>
+{% endblock content %} 
